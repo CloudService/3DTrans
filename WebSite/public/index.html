@@ -1,0 +1,52 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>Data translation for 3D CAD files by FeatureTech</title>
+
+    <link rel="stylesheet" href="stylesheets/tr.css">
+    <script src="javascripts/tr.js"></script>
+  </head>
+  <body>
+  <div id="translation-main">
+  <form>
+ 		<div class="section"><fieldset>
+  			<legend>Source file</legend>
+  			<ul>
+  				<li>Select the source file you want to translate</li>
+  				<li>
+  					<ul id="storage-provider-list">
+  						<li> <div> <img class="provider-icon" src="images/box.png"/></div></li>
+  						<li> <div> <img class="provider-icon" src="images/dropbox.png"/></div></li>
+  						<li> <div> <img class="provider-icon" src="images/baidu.png"/></div></li>
+  						<li> <div> <img class="provider-icon" src="images/a360.png"/></div></li>
+  						<li> <div> <img class="provider-icon" src="images/qq.png"/></div></li>
+  					</ul>
+  				</li>
+  				<li><div class="file-label">source file: </div><input class="file" id="srcFile" type="text"></li>
+  			</ul>
+ 		</fieldset></div>
+ 
+  		<div class="section"><fieldset>
+  			<legend>Destination file</legend>
+  			<ul>
+  				<li>Select the destination file format</li>
+  				<li> <ul id="format-list">
+  						<li> <div>  <input type="radio" name="format" value="dwg">dwg</div></li>
+  						<li> <div>  <input type="radio" name="format" value="dwf">dwf</div></li>
+  						<li> <div>  <input type="radio" name="format" value="stl">stl </div></li>
+  						<li> <div>  <input type="radio" name="format" value="sat">sat </div></li>
+  						<li> <div>  <input type="radio" name="format" value="png">png </div></li>
+  						<li> <div>  <input type="radio" name="format" value="gif">gif </div></li>
+  					</ul></li>
+  				<li> <div class="file-label">destination file: </div><input class="file" id="destFile" type="text"></li>
+  			</ul>
+  		</fieldset></div>
+  		<div class="section"> Email notification: <input id="email" type="text"> </div>
+  		<div class="section"> <input title="convert" id="start-button" type="submit" value="Start translation"></div>
+ 	</form>
+ 	</div>
+  	</body>
+<html>
+  
