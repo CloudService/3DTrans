@@ -69,6 +69,9 @@ ul {
 	width:500px;
 }
 
-.start-button{
-
+#start-button{
+	margin-left:auto;
+	margin-right:auto;
+	height: 100px; 
+	width: 700px
 }

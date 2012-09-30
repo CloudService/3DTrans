@@ -6,15 +6,14 @@
     <title>Data translation for 3D CAD files by FeatureTech</title>
 
     <link rel="stylesheet" href="stylesheets/tr.css">
-
   </head>
   <body>
+  
   <div id="translation-main">
   <form>
  		<div class="section"><fieldset>
-  			<legend>Source file</legend>
+  			<legend>Step 1: Select the source file you want to translate</legend>
   			<ul>
-  				<li>Select the source file you want to translate</li>
   				<li>
   					<ul id="storage-provider-list">
   						<li> <div> <img class="provider-icon" src="images/box.png"/></div></li>
@@ -24,32 +23,40 @@
   						<li> <div> <img class="provider-icon" src="images/qq.png"/></div></li>
   					</ul>
   				</li>
-  				<li><div class="file-label">source file: </div><input class="file" id="srcFile" type="text"></li>
+  				<li><div class="file-label">Source file: </div><input class="file" id="srcFile" type="text"></li>
   			</ul>
  		</fieldset></div>
  
   		<div class="section"><fieldset>
-  			<legend>Destination file</legend>
+  			<legend>Step 2: Select the destination file format</legend>
   			<ul>
-  				<li>Select the destination file format</li>
   				<li> <ul id="format-list">
-  						<li> <div>  <input type="radio" name="format" value="dwg">dwg</div></li>
+  						<li> <div>  <input type="radio" name="format" value="dwg" checked="true">dwg</div></li>
   						<li> <div>  <input type="radio" name="format" value="dwf">dwf</div></li>
   						<li> <div>  <input type="radio" name="format" value="stl">stl </div></li>
   						<li> <div>  <input type="radio" name="format" value="sat">sat </div></li>
   						<li> <div>  <input type="radio" name="format" value="png">png </div></li>
   						<li> <div>  <input type="radio" name="format" value="gif">gif </div></li>
   					</ul></li>
-  				<li> <div class="file-label">destination file: </div><input class="file" id="destFile" type="text"></li>
+  				<li> <div class="file-label">Destination file: </div><input class="file" id="destFile" type="text"></li>
   			</ul>
   		</fieldset></div>
-  		<div class="section"> Email notification: <input id="email" type="text"> </div>
+  		
+  		<div class="section"> 
+  		<fieldset>
+  			<legend>Step 3: Input the email to get the complete notification</legend>
+  			<ul>
+  				<li>Email notification: <input id="email" type="text"> </input></li>
+  			</ul>
+  		</fieldset>
+  		</div>
   		<div class="section"> <input title="convert" id="start-button" type="submit" value="Start translation"></div>
  	</form>
  	</div>
  	
   	<script src="javascripts/jquery/jquery-1.8.2.js"></script>
   	<script src="javascripts/tr.js"></script>
+
   	</body>
 <html>
   
