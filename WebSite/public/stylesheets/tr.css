@@ -70,8 +70,6 @@ ul {
 }
 
 #start-button{
-	margin-left:auto;
-	margin-right:auto;
-	height: 100px; 
-	width: 700px
+	height: 80px; 
+	width: 800px;
 }
