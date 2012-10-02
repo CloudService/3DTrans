@@ -5,8 +5,12 @@
   "main": "server.js",
   "dependencies": {
       "express": "3.0.0rc4",
-      "ejs":"*"
+      "ejs":"*",
+      "everyauth": "git://github.com/bnoguchi/everyauth.git#express3"
   }, 
+	"devDependencies": {
+    "jade": ">=0.12.1"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },

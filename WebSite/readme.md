@@ -34,3 +34,19 @@ Assistant service. (Unit 2)
 Translation worker. (Unit 3) 
  Read the source file and generate the destination file. (The input and output files are both on the local storage.)
  
+ 
+* Dependency modules
+** everyauth
+There are defects in the latest version, consume the version "git://github.com/bnoguchi/everyauth.git#express3" instead.
+
+This version still exists issue (https://github.com/bnoguchi/everyauth/issues/347) for the box.net. Fix it locally after installation.
+
+
+* Autherization
+** Box
+The entry and callback paths are defined as below.
+  .entryPath('/auth/box')
+  .callbackPath('/auth/box/callback')
+The HTML code "<a href='/auth/box'> Login box </a>" can start the auth process. 
+Configure the box application. Set the Redirect URL to be /auto/box/callback, like http://localhost:3000/auth/box/callback.
+
