@@ -15,4 +15,8 @@
         "Name": "jquery-ui-*"
         , "Source": "http://jqueryui.com/download"
     }
+    , {
+        "Name": "google closure templates"
+        , "Source": "http://code.google.com/p/closure-templates/downloads/list"
+    }
 ]
