@@ -1,7 +1,3 @@
-
-
-		
-
 	
 var component = component || {};
 component.ui = component.ui || {};
@@ -34,7 +30,7 @@ component.ui.fileDialog.dialog = function (){
         		"Ok": function() { $(this).dialog("close"); } 
         		, "Cancel" : function() { $(this).dialog("close"); } 
     		}
-    		, title: "Select the source file"
+    		, title: "Select file"
 			, width: 800
 			, height: 600
 			, draggable: false
@@ -78,7 +74,9 @@ component.ui.fileDialog.dialog = function (){
 
 }
 
-
+/** 
+*@Constructor
+*/
 component.ui.fileDialog.fileObject = function(){
 	/**@type {string} */
 	this._name = "file";
