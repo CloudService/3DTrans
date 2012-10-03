@@ -20,7 +20,7 @@
 	padding: 0;
 	list-style:none; 
 	width:760px;
-	margin-top:25px;
+	margin-top:0px;
 }
 
 .file-header{
@@ -36,7 +36,7 @@
 	border-top-width: 1px;
 	margin-top:auto;
 	margin-bottom:auto;
-	background-color:#BABBBA;
+	background-color: rgb(242, 247, 255);
 }
 
 .file-header-name-column{

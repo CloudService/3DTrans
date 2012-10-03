@@ -8,18 +8,22 @@ component.ui.fileDialog = component.ui.fileDialog || {};
 component.ui.fileDialog.dialog = function (){
 
 	/** @type {HTMLDivElement} the outmost div of the dialog*/
-	_dialogElement = {};
+	var _dialogElement = {};
 	
 	/** @type {HTMLDivElement} the folder navigator element*/
-	_folderNavigatorElement = null;
+	var _folderNavigatorElement = null;
 	
 	/** @type {component.ui.fileDialog.fileObject} the root directory*/
-	_rootDirectory = null; 
+	var _rootDirectory = null; 
 	
 	/** @type {bool} */
-	_isInitialized = false;
+	var _isInitialized = false;
 	
-
+	/** @type {Array} The array of the selected {component.ui.fileDialog.fileObject} */
+	var _selectedItem = [];
+	
+	/** @type {Object} the map for {component.ui.fileDialog.fileObject}*/
+	var _fileMap={};
 	
 	/** Constructor
 	*@this {component.ui.fileDialog}
@@ -40,16 +44,25 @@ component.ui.fileDialog.dialog = function (){
 		
 		// Create root folder.
 		_rootDirectory = new component.ui.fileDialog.fileObject();
-		_rootDirectory.setId(rootId)
-			.setName(rootName ? rootName : "root")
-			.setIsFolder(true)
-			.setIsChildrenPopulated(false);
+		_rootDirectory.id = rootId;
+		_rootDirectory.name = rootName ? rootName : "root";
+		_rootDirectory.isFolder = true;
+		_rootDirectory.isChildrenPopulated = false;
 			
-		
+		this._addFile(_rootDirectory);
+			
+		// main dialog
 		var dialogHtml = component.ui.fileDialog.template.filedialog();
 		_dialogElement = $(dialogHtml);
 		
+		// navigator
 		_folderNavigatorElement = $("#file-navigator", _dialogElement);
+		
+		// file header
+		var fileHeaderHtml = component.ui.fileDialog.template.fileheader();
+		var fileHeaderElement = $("#file-header", _dialogElement);
+		fileHeaderElement.append($(fileHeaderHtml));
+		
 		// Add to document
 		$("body").append(_dialogElement);
 		
@@ -64,13 +77,13 @@ component.ui.fileDialog.dialog = function (){
     		, title: "Select file"
 			, width: 800
 			, height: 600
-			, draggable: false
+			, draggable: true
 			, modal: true
 			, resizable: false 
 			, autoOpen: false
 		});	
 		
-		this.updateFileNavigator([{name: _rootDirectory._name, id: _rootDirectory._id}]);
+		this.updateFileNavigator([{name: _rootDirectory.name, id: _rootDirectory.id}]);
 
 		
 		_dialogElement.dialog("open");
@@ -79,35 +92,46 @@ component.ui.fileDialog.dialog = function (){
 	}
 	
 	/** Append files
-	*@this {component.ui.fileDialog}
+	*@this {component.ui.fileDialog.dialog}
 	*@api public
 	*@parentId {string} The id of the parent.
-	*@files {Array} the file list.
+	*@files {Array} of {component.ui.fileDialog.fileObject} the file list.
 	*@return this for chain.
 	*/
 	this.appendFiles = function(parentId, files){
+	
+		var parent = this._getFile(parentId);
+		if(!parent){
+			console.log("Error: parent '" + parentId + "' doesn't exist.");
+			return this;
+		}
+	
 		var fileList = $("#file-list", _dialogElement);
 		
 		var length = files.length;
 		for(var i = 0; i < length; i++){
 			var file = files[i];
 			
+			// JS object
+			parent.appendChild(file);
+			this._addFile(file);
+			
+			// DOM element
 			var args = {
-				"thumbnail": file["_isFolder"] ? "file-icon-folder" : "file-icon-image"
-				, "name" : file["_name"]
-				, "size": file["_size"]
-				, "moddate": file["_moddate"]
+				"thumbnail": file["isFolder"] ? "file-icon-folder" : "file-icon-image"
+				, "name" : file["name"]
+				, "size": file["size"]
+				, "moddate": file["moddate"]
 			}
 			
 			var fileHtml = component.ui.fileDialog.template.filerow(args);
 			
 			fileList.append($(fileHtml));
 		}
-	
 	}
 	
 	/** Append files
-	*@this {component.ui.fileDialog}
+	*@this {component.ui.fileDialog.dialog}
 	*@api public
 	*@path {Array} The array of object {"name":"", "id":""}.
 	*@return this for chain.
@@ -124,6 +148,28 @@ component.ui.fileDialog.dialog = function (){
 		
 		return this;
 	}
+	
+	/** Add file
+	*@this {component.ui.fileDialog.dialog}
+	*@private
+	*@file {component.ui.fileDialog.fileObject} 
+	*@return this for chain.
+	*/
+	this._addFile = function(file){
+		
+		_fileMap[file.id] = file;
+		return this;
+	}
+	
+	/** get file
+	*@this {component.ui.fileDialog.dialog}
+	*@private
+	*@id {string} The file id.
+	*@return {component.ui.fileDialog.fileObject}
+	*/
+	this._getFile= function(id){
+		return _fileMap[id];
+	}	
 
 }
 
@@ -132,67 +178,50 @@ component.ui.fileDialog.dialog = function (){
 */
 component.ui.fileDialog.fileObject = function(){
 	/**@type {string} */
-	this._id = "id";
+	this.id = "id";
 	
 	/**@type {string} */
-	this._name = "folder";
-	
-	/**@type {bool} */
-	this._isFolder = true;
-	
-	/**@type {string} */
-	this._size = "-";
-	
-	/**@type {sting} */
-	this._moddate = "unknown";
+	this.name = "folder";
+	/**@type {component.ui.fileDialog.fileObject} */
+	this.parent = null;
 	
 	/**@type {Array} */
-	this._children = [];
+	_children = [];
 	
 	/**@type {bool} */
-	this._isChildrenPopulated = false;
+	this.isChildrenPopulated = false;
 	
-	/** Set function
+	/**@type {bool} */
+	this.isFolder = true;
+	
+	/**@type {string} */
+	this.size = "-";
+	
+	/**@type {sting} */
+	this.moddate = "unknown";
+	
+	/** get file
 	*@this {component.ui.fileDialog.fileObject}
-	*@api public
-	*@id {string}
-	*@return this for chain.
+	*@public
+	*@return {Array} of {component.ui.fileDialog.fileObject}
 	*/
-	this.setId = function(id){
-		this._id = id;
-		return this;
+	this.children = function(){
+		return _children();
 	}
 	
-	/** Set function
+	/** append child
 	*@this {component.ui.fileDialog.fileObject}
-	*@api public
-	*@name {string}
+	*@public
+	*@child {component.ui.fileDialog.fileObject}}
 	*@return this for chain.
 	*/
-	this.setName = function(name){
-		this._name = name;
-		return this;
-	}
-	
-	/** Set function
-	*@this {component.ui.fileDialog.fileObject}
-	*@api public
-	*@isFolder {bool}
-	*@return this for chain.
-	*/
-	this.setIsFolder = function(isFolder){
-		this._isFolder = isFolder;
-		return this;
-	}
-	
-	/** Set function
-	*@this {component.ui.fileDialog.fileObject}
-	*@api public
-	*@isChildrenPopulated {bool}
-	*@return this for chain.
-	*/
-	this.setIsChildrenPopulated = function(isChildrenPopulated){
-		this._isChildrenPopulated = isChildrenPopulated;
+	this.appendChild = function (child){
+		_children.push(child);
+		if(child.parent != this){
+			console.log("Warning: The parent is changed.");
+			child.parent = this;
+		}
+		
 		return this;
 	}
 }

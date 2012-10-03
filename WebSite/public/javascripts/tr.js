@@ -51,10 +51,10 @@ service.trans.translator = function (){
 		var fileInfo = fileList[i];
 		var file = new component.ui.fileDialog.fileObject();
 		
-		file._name = fileInfo.name;
-		file._isFolder = fileInfo.isFolder;
-		file._size = fileInfo.size;
-		file._moddate = fileInfo.moddate;
+		file.name = fileInfo.name;
+		file.isFolder = fileInfo.isFolder;
+		file.size = fileInfo.size;
+		file.moddate = fileInfo.moddate;
 		
 		files.push(file);
 	}

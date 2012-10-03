@@ -9,7 +9,7 @@ if (typeof component.ui.fileDialog.template == 'undefined') { component.ui.fileD
 
 component.ui.fileDialog.template.filedialog = function(opt_data, opt_sb) {
   var output = opt_sb || new soy.StringBuilder();
-  output.append('<div id="file-dialog"><div id="file-navigator">File navigator</div><ul id = "file-list"><li class="file-header"><div class="file-header-name-column" ><div data-area-name="name"> Name</div></div><div class="file-header-size-column"  data-area-name="size"> Size</div><div class="file-header-modification-date-column" data-area-name="midification-date"> Modification Date </div></li></ul></div>');
+  output.append('<div id="file-dialog"><div id="file-navigator">File navigator</div><div id="file-header" class="file-header"> </div><ul id = "file-list"></ul></div>');
   return opt_sb ? '' : output.toString();
 };
 
@@ -29,7 +29,7 @@ component.ui.fileDialog.template.navigator = function(opt_data, opt_sb) {
 
 component.ui.fileDialog.template.fileheader = function(opt_data, opt_sb) {
   var output = opt_sb || new soy.StringBuilder();
-  output.append('<li class="file-header"><div class="file-header-name-column" ><div data-area-name="name"> Name</div></div><div class="file-header-size-column"  data-area-name="size"> Size</div><div class="file-header-modification-date-column" data-area-name="midification-date"> Modification Date </div></li>');
+  output.append('\t\t<div class="file-header-name-column" ><div data-area-name="name"> Name</div></div><div class="file-header-size-column"  data-area-name="size"> Size</div><div class="file-header-modification-date-column" data-area-name="midification-date"> Modification Date </div>');
   return opt_sb ? '' : output.toString();
 };
 
