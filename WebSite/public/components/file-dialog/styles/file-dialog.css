@@ -1,4 +1,20 @@
 
+#file-navigator{
+	height: 20px;
+	margin-top:10px;
+	margin-bottom:20px;
+}
+.file-navigator-separator{
+	float:left;
+	display:block;
+}
+.file-navigator-item{
+	float:left;
+	display:block;
+	color: green;
+	cursor: pointer;
+}
+
 #file-list { 
 	margin: 0;
 	padding: 0;

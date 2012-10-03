@@ -9,7 +9,20 @@ if (typeof component.ui.fileDialog.template == 'undefined') { component.ui.fileD
 
 component.ui.fileDialog.template.filedialog = function(opt_data, opt_sb) {
   var output = opt_sb || new soy.StringBuilder();
-  output.append('<div id="file-dialog"><div>File path</div><ul id = "file-list"><li class="file-header"><div class="file-header-name-column" ><div data-area-name="name"> Name</div></div><div class="file-header-size-column"  data-area-name="size"> Size</div><div class="file-header-modification-date-column" data-area-name="midification-date"> Modification Date </div></li></ul></div>');
+  output.append('<div id="file-dialog"><div id="file-navigator">File navigator</div><ul id = "file-list"><li class="file-header"><div class="file-header-name-column" ><div data-area-name="name"> Name</div></div><div class="file-header-size-column"  data-area-name="size"> Size</div><div class="file-header-modification-date-column" data-area-name="midification-date"> Modification Date </div></li></ul></div>');
+  return opt_sb ? '' : output.toString();
+};
+
+
+component.ui.fileDialog.template.navigator = function(opt_data, opt_sb) {
+  var output = opt_sb || new soy.StringBuilder();
+  output.append('\t');
+  var folderList6 = opt_data.folderPath;
+  var folderListLen6 = folderList6.length;
+  for (var folderIndex6 = 0; folderIndex6 < folderListLen6; folderIndex6++) {
+    var folderData6 = folderList6[folderIndex6];
+    output.append('<div id="', soy.$$escapeHtml(folderData6.id), '" class="file-navigator-item"> ', soy.$$escapeHtml(folderData6.name), '</div>', (! (folderIndex6 == folderListLen6 - 1)) ? '<div class="file-navigator-separator"> | </div>' : '');
+  }
   return opt_sb ? '' : output.toString();
 };
 

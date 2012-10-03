@@ -8,13 +8,18 @@ component.ui.fileDialog = component.ui.fileDialog || {};
 component.ui.fileDialog.dialog = function (){
 
 	/** @type {HTMLDivElement} the outmost div of the dialog*/
-	_dialog = {};
+	_dialogElement = {};
+	
+	/** @type {HTMLDivElement} the folder navigator element*/
+	_folderNavigatorElement = null;
 	
 	/** @type {component.ui.fileDialog.fileObject} the root directory*/
 	_rootDirectory = null; 
 	
 	/** @type {bool} */
 	_isInitialized = false;
+	
+
 	
 	/** Constructor
 	*@this {component.ui.fileDialog}
@@ -33,14 +38,23 @@ component.ui.fileDialog.dialog = function (){
 		}
 		_isInitialized = true;
 		
+		// Create root folder.
+		_rootDirectory = new component.ui.fileDialog.fileObject();
+		_rootDirectory.setId(rootId)
+			.setName(rootName ? rootName : "root")
+			.setIsFolder(true)
+			.setIsChildrenPopulated(false);
+			
 		
 		var dialogHtml = component.ui.fileDialog.template.filedialog();
-		_dialog = $(dialogHtml);
+		_dialogElement = $(dialogHtml);
+		
+		_folderNavigatorElement = $("#file-navigator", _dialogElement);
 		// Add to document
-		$("body").append(_dialog);
+		$("body").append(_dialogElement);
 		
 		// Set the dialog options
-		_dialog.dialog(
+		_dialogElement.dialog(
 		{ 
 			buttons: 
     		{
@@ -56,18 +70,15 @@ component.ui.fileDialog.dialog = function (){
 			, autoOpen: false
 		});	
 		
-		// Create root folder.
-		_rootDirectory = new component.ui.fileDialog.fileObject();
-		_rootDirectory.setName(rootName ? rootName : "root")
-			.setIsFolder(true)
-			.setIsChildrenPopulated(false);
+		this.updateFileNavigator([{name: _rootDirectory._name, id: _rootDirectory._id}]);
+
 		
-		_dialog.dialog("open");
+		_dialogElement.dialog("open");
 		
 		return this;
 	}
 	
-	/** Constructor
+	/** Append files
 	*@this {component.ui.fileDialog}
 	*@api public
 	*@parentId {string} The id of the parent.
@@ -75,7 +86,7 @@ component.ui.fileDialog.dialog = function (){
 	*@return this for chain.
 	*/
 	this.appendFiles = function(parentId, files){
-		var fileList = $("#file-list", _dialog);
+		var fileList = $("#file-list", _dialogElement);
 		
 		var length = files.length;
 		for(var i = 0; i < length; i++){
@@ -93,6 +104,25 @@ component.ui.fileDialog.dialog = function (){
 			fileList.append($(fileHtml));
 		}
 	
+	}
+	
+	/** Append files
+	*@this {component.ui.fileDialog}
+	*@api public
+	*@path {Array} The array of object {"name":"", "id":""}.
+	*@return this for chain.
+	*/
+	this.updateFileNavigator = function(path){
+		
+		if(_folderNavigatorElement){
+			_folderNavigatorElement.html(''); // remove the current navigator.
+			
+			var args = {folderPath:path};
+			var naviHTML = component.ui.fileDialog.template.navigator(args);
+			_folderNavigatorElement.append($(naviHTML));
+		}
+		
+		return this;
 	}
 
 }
