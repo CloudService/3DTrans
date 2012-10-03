@@ -44,13 +44,14 @@
 
 /**
  * Row
+ * @param id
  * @param thumbnail
  * @param name The name of the file or folder.
  * @param size
  * @param moddate The modification date, like 2012-10-1 10:45
  */
 {template .filerow}
-  	<li class="file-row"> 
+  	<li class="file-row" id="{$id}"> 
 		<div class="file-name-column" >
 			<div class=" file-icon-thumbnail-spaceholder" data-area-name="thumbnail">
 				<div class=" {$thumbnail}"></div>

@@ -41,6 +41,7 @@ var service = service || {};
 service.trans = service.trans || {};
 
 service.trans.translator = function (){
+
 	this.openFileDialog = function(data){
 	
 	var files = [];
@@ -51,6 +52,7 @@ service.trans.translator = function (){
 		var fileInfo = fileList[i];
 		var file = new component.ui.fileDialog.fileObject();
 		
+		file.id = fileInfo.id;
 		file.name = fileInfo.name;
 		file.isFolder = fileInfo.isFolder;
 		file.size = fileInfo.size;
@@ -59,6 +61,19 @@ service.trans.translator = function (){
 		files.push(file);
 	}
 	
-		openDialog(files);
+		openDialog(files, _onOK);
+	}
+	
+	_onOK = function (event){
+		var dialog = event.data.dialog;
+		var selections = dialog.getSelections();
+		if(selections.length > 0){
+			var fileFullName = selections[0].fullName();
+			$("#srcFile").val(fileFullName);
+			
+			var ext = $('input:radio[name=format]:checked').val();
+			var destName = fileFullName + "." + ext;
+			$("#destFile").val(destName);
+		}
 	}
 }

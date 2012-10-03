@@ -36,6 +36,6 @@ component.ui.fileDialog.template.fileheader = function(opt_data, opt_sb) {
 
 component.ui.fileDialog.template.filerow = function(opt_data, opt_sb) {
   var output = opt_sb || new soy.StringBuilder();
-  output.append('<li class="file-row"><div class="file-name-column" ><div class=" file-icon-thumbnail-spaceholder" data-area-name="thumbnail"><div class=" ', soy.$$escapeHtml(opt_data.thumbnail), '"></div></div><div class="file-name" data-area-name="name"> ', soy.$$escapeHtml(opt_data.name), '</div></div><div class="file-size-column"  data-area-name="size"> ', soy.$$escapeHtml(opt_data.size), ' </div><div class="file-modificaion-date-column" data-area-name="midification-date">', soy.$$escapeHtml(opt_data.moddate), ' </div></li>');
+  output.append('<li class="file-row" id="', soy.$$escapeHtml(opt_data.id), '"><div class="file-name-column" ><div class=" file-icon-thumbnail-spaceholder" data-area-name="thumbnail"><div class=" ', soy.$$escapeHtml(opt_data.thumbnail), '"></div></div><div class="file-name" data-area-name="name"> ', soy.$$escapeHtml(opt_data.name), '</div></div><div class="file-size-column"  data-area-name="size"> ', soy.$$escapeHtml(opt_data.size), ' </div><div class="file-modificaion-date-column" data-area-name="midification-date">', soy.$$escapeHtml(opt_data.moddate), ' </div></li>');
   return opt_sb ? '' : output.toString();
 };

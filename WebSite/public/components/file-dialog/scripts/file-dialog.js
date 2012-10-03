@@ -13,6 +13,9 @@ component.ui.fileDialog.dialog = function (){
 	/** @type {HTMLDivElement} the folder navigator element*/
 	var _folderNavigatorElement = null;
 	
+	/** @type {HTMLElement} the file list element*/
+	var _fileListElement = null;
+	
 	/** @type {component.ui.fileDialog.fileObject} the root directory*/
 	var _rootDirectory = null; 
 	
@@ -63,6 +66,12 @@ component.ui.fileDialog.dialog = function (){
 		var fileHeaderElement = $("#file-header", _dialogElement);
 		fileHeaderElement.append($(fileHeaderHtml));
 		
+		// File list
+		_fileListElement = $("#file-list", _dialogElement);
+		
+		// bind event
+		_fileListElement.on("click", {dialog: this}, _clickHandler);
+		
 		// Add to document
 		$("body").append(_dialogElement);
 		
@@ -106,7 +115,7 @@ component.ui.fileDialog.dialog = function (){
 			return this;
 		}
 	
-		var fileList = $("#file-list", _dialogElement);
+		//var fileList = $("#file-list", _dialogElement);
 		
 		var length = files.length;
 		for(var i = 0; i < length; i++){
@@ -118,15 +127,19 @@ component.ui.fileDialog.dialog = function (){
 			
 			// DOM element
 			var args = {
-				"thumbnail": file["isFolder"] ? "file-icon-folder" : "file-icon-image"
+				"id": file["id"]
+				, "thumbnail": file["isFolder"] ? "file-icon-folder" : "file-icon-image"
 				, "name" : file["name"]
 				, "size": file["size"]
 				, "moddate": file["moddate"]
 			}
 			
 			var fileHtml = component.ui.fileDialog.template.filerow(args);
+			var fileElement = $(fileHtml);
+			file.htmlElement = fileElement;
 			
-			fileList.append($(fileHtml));
+			// DOM
+			_fileListElement.append(fileElement);
 		}
 	}
 	
@@ -169,8 +182,88 @@ component.ui.fileDialog.dialog = function (){
 	*/
 	this._getFile= function(id){
 		return _fileMap[id];
-	}	
-
+	}
+	
+	/** Click handler
+	*@this 
+	*@private
+	*@e {Event} The click event.
+	*@return 
+	*/
+	_clickHandler = function (e){
+		var dialog = e.data.dialog;
+		var id = null;
+		
+		var eventElement = e.srcElement;
+		while(eventElement){
+			id = eventElement["id"];
+			
+			if(id && id != ""){
+				dialog.setSingleSelection(id);
+				break;
+			}
+				
+			eventElement = eventElement.parentElement;
+		}
+		
+		
+		
+		// x-browser prevent default action and cancel bubbling 
+		if (typeof e.preventDefault === 'function') {
+			e.preventDefault();
+			e.stopPropagation(); 
+		} else {
+			e.returnValue = false;
+			e.cancelBubble = true;
+		}
+	}
+	
+	
+	/** select a file
+	*@this {component.ui.fileDialog.dialog}
+	*@public
+	*@id {string} The file id.
+	*@return this for chain.
+	*/
+	this.setSingleSelection = function(id){
+		var file = this._getFile(id);
+		if(!file){
+			console.log("Error: invalid file id: " + id);
+			return this;
+		}
+		
+		var length = _selectedItem.length;
+		for(var i = 0; i < length; ++i){
+			var temp = _selectedItem[i];
+			temp.htmlElement.removeClass("file-row-selected");
+			temp.htmlElement.addClass("file-row");
+		}
+		_selectedItem = [];
+		
+		file.htmlElement.removeClass("file-row");
+		file.htmlElement.addClass("file-row-selected");
+		_selectedItem.push(file);
+		
+		return this;
+	}
+	
+	/** get the selected files
+	*@this {component.ui.fileDialog.dialog}
+	*@public
+	*@return {Array} of {{component.ui.fileDialog.dialog}}
+	*/
+	this.getSelections = function(){
+		return _selectedItem;
+	}
+	
+	/** Bind the event to dialog
+	*@this {component.ui.fileDialog.dialog}
+	*@public
+	*@return this for chain.
+	*/	
+	this.bind = function(event,callback){
+		_dialogElement.bind(event, {dialog: this}, callback);
+	}
 }
 
 /** 
@@ -200,13 +293,32 @@ component.ui.fileDialog.fileObject = function(){
 	/**@type {sting} */
 	this.moddate = "unknown";
 	
-	/** get file
+	/**@type {HTMLElement} */
+	this.htmlElement = null;
+	
+	/** get children
 	*@this {component.ui.fileDialog.fileObject}
 	*@public
 	*@return {Array} of {component.ui.fileDialog.fileObject}
 	*/
 	this.children = function(){
 		return _children();
+	}
+	
+	/** get the full name of the file
+	*@this {component.ui.fileDialog.fileObject}
+	*@public
+	*@return {string} The format is "/root/directory/file"
+	*/
+	this.fullName = function(){
+		var fullName = this.isFolder? "/" : "";
+		var parent = this;
+		while(parent){
+			fullName = ("/" + parent.name +  fullName);
+			parent=parent.parent;
+		}
+		
+		return fullName;
 	}
 	
 	/** append child
