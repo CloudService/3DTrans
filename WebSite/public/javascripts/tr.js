@@ -42,6 +42,23 @@ service.trans = service.trans || {};
 
 service.trans.translator = function (){
 	this.openFileDialog = function(data){
-		openDialog();
+	
+	var files = [];
+	
+	var fileList = data.files;
+	var length = fileList.length;
+	for(var i = 0; i < length; i++){
+		var fileInfo = fileList[i];
+		var file = new component.ui.fileDialog.fileObject();
+		
+		file._name = fileInfo.name;
+		file._isFolder = fileInfo.isFolder;
+		file._size = fileInfo.size;
+		file._moddate = fileInfo.moddate;
+		
+		files.push(file);
+	}
+	
+		openDialog(files);
 	}
 }
