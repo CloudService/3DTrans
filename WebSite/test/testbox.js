@@ -1,13 +1,14 @@
 var express = require('express')
   , everyauth = require('everyauth')
   , conf = require('./conf')
-  , everyauthRoot = __dirname + '/..';
+  , request = require('request');
 
 everyauth.debug = true;
 
 var usersById = {};
 var nextUserId = 0;
 
+// This is called by the box.js to save the user
 function addUser (source, sourceUser) {
   var user;
   if (arguments.length === 1) { // password-based
@@ -21,39 +22,9 @@ function addUser (source, sourceUser) {
   return user;
 }
 
-var usersByVimeoId = {};
-var usersByJustintvId = {};
-var usersBy37signalsId = {};
-var usersByTumblrName = {};
-var usersByDropboxId = {};
-var usersByFbId = {};
-var usersByTwitId = {};
-var usersByGhId = {};
-var usersByInstagramId = {};
-var usersByFoursquareId = {};
-var usersByGowallaId = {};
-var usersByLinkedinId = {};
-var usersByGoogleId = {};
-var usersByAngelListId = {};
-var usersByYahooId = {};
-var usersByGoogleHybridId = {};
-var usersByReadabilityId = {};
+
 var usersByBoxId = {};
-var usersByOpenId = {};
-var usersByDwollaId = {};
-var usersByVkId = {};
-var usersBySkyrockId = {};
-var usersByEvernoteId = {};
-var usersByAzureAcs = {};
-var usersByTripIt = {};
-var usersBy500pxId = {};
-var usersBySoundCloudId = {};
-var usersByMailchimpId = {};
-var usersMailruId = {};
-var usersByMendeleyId = {};
-var usersByLogin = {
-  'brian@example.com': addUser({ login: 'brian@example.com', password: 'password'})
-};
+
 
 everyauth.everymodule
   .findUserById( function (id, callback) {
@@ -65,7 +36,7 @@ everyauth.box
   .apiKey(conf.box.apiKey)
   .findOrCreateUser( function (sess, authToken, boxUser) {
     return usersByBoxId[boxUser.user_id] ||
-      (usersByDropboxId[boxUser.user_id] = addUser('box', boxUser));
+      (usersByBoxId[boxUser.user_id] = addUser('box', boxUser));
   })
   .redirectPath('/success');
 
@@ -78,12 +49,98 @@ app.use(express.static(__dirname + '/public'))
   .use(everyauth.middleware(app));
 
 app.get('/debug', function (req, res) {
+	var url = 'https://www.box.com/api/2.0/folders/0';
+	var headers = {Authorization: "BoxAuth api_key=ujdb2e8pe3geqmkgm2fg66pg552dwl2f&auth_token=gymnnxkbxikj0jm6rz25cq4kwe8go808"};
+
+	request.get({url:url, headers:headers}, function (e, r, body) {
+
+	console.log(JSON.stringify(body));
+
+	});
   res.send(__dirname);
 });
 
 app.get('/success', function (req, res) {
 	//console.log(req.session.auth.box);
-  res.send(JSON.stringify(req.session.auth.box));
+   var boxUser = JSON.stringify(req.session.auth.box);
+  
+  	var url = 'https://www.box.com/api/2.0/folders/0';
+  	var apiKey = conf.box.apiKey;
+  	var access_token = req.session.auth.box.authToken;//"gymnnxkbxikj0jm6rz25cq4kwe8go808";
+	var headers = {Authorization: "BoxAuth api_key=" + apiKey + "&auth_token=" + access_token};
+
+	request.get({url:url, headers:headers}, function (e, r, body) {
+	
+	/*
+	The format of the return value is like.
+"{
+    "type": "folder",
+    "id": "0",
+    "sequence_id": null,
+    "name": "AllFiles",
+    "created_at": null,
+    "modified_at": null,
+    "description": null,
+    "size": 0,
+    "created_by": {
+        "type": "user",
+        "id": "185684932",
+        "name": "transMr",
+        "login": "3dcadtrans@gmail.com"
+    },
+    "modified_by": {
+        "type": "user",
+        "id": "185684932",
+        "name": "transMr",
+        "login": "3dcadtrans@gmail.com"
+    },
+    "owned_by": {
+        "type": "user",
+        "id": "185684932",
+        "name": "transMr",
+        "login": "3dcadtrans@gmail.com"
+    },
+    "shared_link": null,
+    "parent": null,
+    "item_status": "active",
+    "item_collection": {
+        "total_count": 2,
+        "entries": [
+            {
+                "type": "folder",
+                "id": "419345934",
+                "sequence_id": "0",
+                "name": "Web"
+            },
+            {
+                "type": "folder",
+                "id": "419345748",
+                "sequence_id": "0",
+                "name": "Robot"
+            }
+        ]
+    }
+}"
+	*/
+	
+	var folderInfo = JSON.parse(body);
+	var fileList = folderInfo.item_collection.entries;
+	
+	var subFiles = [];
+	var length = fileList.length;
+	for(var i = 0; i < length; ++i){
+		var entry = fileList[i];
+		var file = {};
+		file.name=entry.name;
+		file.isFolder = entry.type === "folder" ? true : false;
+		subFiles.push(file);
+	}
+
+	//console.log(JSON.stringify(body));
+	res.send(boxUser + "<br/><br/>" + JSON.stringify(headers) + "<br/><br/>"  + JSON.stringify(subFiles));
+
+	});
+	
 });
 
 app.listen(3000);
