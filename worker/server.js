@@ -3,6 +3,8 @@
  */
 var io = require('socket.io-client');
 var log4js = require('log4js');
+var request = require('request');
+var fs = require('fs');
 
 /**********************************************************************/
 // Configure logger
@@ -79,7 +81,9 @@ socket.on('dispatchTask', function (t) {
     	downloadFile(t, function(){ 
     		doTranslation(t, function(){
     			uploadFile(t, function(){
-    				sendMailNotification(t);
+    				sendMailNotification(t, function (){
+    						cleanupTempFiles(t);
+    					})
     				})
     			})
     		});
@@ -89,24 +93,45 @@ socket.on('dispatchTask', function (t) {
 var downloadFile = function(t, cb){
 
 	// ToDo download file from box
-	
-	logger.info("File [" + t["srcFileName"] + "] download completed.");
+	var url = 'https://api.box.com/2.0/files/'+t['srcFileId'] +'/data';
+	var headers = {Authorization: 'BoxAuth api_key='+t['apiKey'] +'&auth_token='+t['access_token']};
+
+	var localSrcFileName =  __dirname + '/' + t['taskId'].toString() + '_' + t["srcFileName"];
+	t["localSrcFileName"] =localSrcFileName;
+	request.get({url:url, headers:headers}).pipe(fs.createWriteStream(localSrcFileName));
+
+	logger.debug("File [" + t["srcFileName"] + "] is download as ["+localSrcFileName+"].");
 	cb();
 
 }
 
 var doTranslation = function(t, cb){
 
-	logger.info("File [" + t["destFileName"] + "] translation completed.");
+	var localDestFileName = __dirname + '/' + t['taskId'].toString() + '_' + t["destFileName"];
+	t["localDestFileName"] = localDestFileName;
+	
+	fs.renameSync(t["localSrcFileName"], localDestFileName); // Todo - use the rename for prototype.
+	logger.debug("File [" + localDestFileName + "] is translated.");
 	cb();
 }
 
 var uploadFile = function(t, cb){
-	logger.info("File [" + t["destFileName"] + "] upload completed.");
+	logger.debug("File [" + t["localDestFileName"] + "] is uploaded as ["+ t["destFileName"] +"].");
 	cb();
 }
 
-var sendMailNotification = function(t){
-	logger.info("Mail [" + t["email"] + "] notification completed.");
+var sendMailNotification = function(t,cb ){
+	logger.debug("Mail notification is sent to [" + t["email"] + "].");
+	cb();
+}
 
+var cleanupTempFiles = function(t){
+	logger.debug("Cleanup begins.");
+	
+	fs.unlink(t["localSrcFileName"]);
+	fs.unlink(t["localDestFileName"]);
+	
+	logger.debug(t["localSrcFileName"] + ' is deleted');
+	logger.debug(t["localDestFileName"] + ' is deleted');
+	logger.debug("Cleanup is completed.");
 }

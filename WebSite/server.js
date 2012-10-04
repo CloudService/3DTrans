@@ -14,6 +14,7 @@ var http = require('http');
 /**********************************************************************/
 var pendingTranslationTasks=[];
 var workerSockets = [];
+var nextTaskId=0;
 
 /**********************************************************************/
 // Configure logger
@@ -227,6 +228,7 @@ app.post('/submit', function(req, res, next){
 	logger.info(taskString);
 	
 	// Todo - only box is supported.
+	task["taskId"]= nextTaskId++;
 	task["storageProvider"] = "box";
 	task["apiKey"] = conf.box.apiKey;
 	task["access_token"] = req.session.auth.box.authToken;
@@ -252,7 +254,7 @@ app.post('/submit', function(req, res, next){
 		Connection: keep-alive
 	*/
 	
-	// dispatchTasks(); 
+	dispatchTasks(); 
 });
 
 // Rest API to get the tasks
