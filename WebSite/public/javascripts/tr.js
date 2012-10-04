@@ -3,8 +3,18 @@ $(document).ready(function(){
 	$("#start-button").button();
 	$("#start-button").click( function(e){
 		// Check 
-		$.post("/submit", { name: "John", time: "2pm" }, function() {
-			parent.location.href='/?d=1';
+		var task = service.trans.translator.task;
+		
+		var fileFullName = task["srcFileName"];
+		if(fileFullName === ""){
+			alert("Please select the file you want to translate.");
+			return;
+			}
+		
+		task["email"] = $("#email").val();
+		
+		$.post("/submit", task, function() {
+			parent.location.href='/?d=1'; // update the task queue number
 			alert("Your request is accepted.");
 		})
 		.error(function() { parent.location.href='/error';});
@@ -42,11 +52,11 @@ $(document).ready(function(){
    });
    
    $('input:radio[name=format]').change(function(){
-			var fileFullName = $("#srcFile").val();
+  			var task = service.trans.translator.task;
+			var fileFullName = task["srcFileName"];
 			if(fileFullName != ""){
-				var ext = $('input:radio[name=format]:checked').val();
-				var destName = fileFullName + "." + ext;
-				$("#destFile").val(destName);
+				// Update destination format
+				service.trans.translator.updateDestFormat();
 			}
 	   }
    ); 
@@ -84,12 +94,39 @@ service.trans.translator = function (){
 		var dialog = event.data.dialog;
 		var selections = dialog.getSelections();
 		if(selections.length > 0){
-			var fileFullName = selections[0].fullName();
+			var selection = selections[0];
+			
+			// Save the task
+			var task = service.trans.translator.task;
+			task["srcFileId"] = selection["id"];
+			task["srcFileName"] = selection["name"];
+			
+			var fileFullName = selection.fullName();
+			task["srcFileFullName"] = fileFullName;
+			
+			// Update DOM
 			$("#srcFile").val(fileFullName);
 			
-			var ext = $('input:radio[name=format]:checked').val();
-			var destName = fileFullName + "." + ext;
-			$("#destFile").val(destName);
+			// Update destination format
+			service.trans.translator.updateDestFormat();
 		}
 	}
+}
+
+service.trans.translator.task={
+	"srcFileId" : ""
+	, "srcFileName" : ""
+	, "srcFileFullName" :""
+	, "destFormat": ""
+	, "destFileName" : ""
+	, "email": ""};
+service.trans.translator.updateDestFormat = function(){
+	var task = service.trans.translator.task;
+	
+	var ext = $('input:radio[name=format]:checked').val();
+	task["destFormat"] = ext;
+	task["destFileName"] = task["srcFileName"] + "." + ext;
+	
+	var destFullName = task["srcFileFullName"] + "." + ext;
+	$("#destFile").val(destFullName);		
 }

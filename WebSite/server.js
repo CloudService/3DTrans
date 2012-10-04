@@ -13,6 +13,7 @@ var http = require('http');
 // global variables
 /**********************************************************************/
 var pendingTranslationTasks=[];
+var workerSockets = [];
 
 /**********************************************************************/
 // Configure logger
@@ -225,11 +226,37 @@ app.post('/submit', function(req, res, next){
 	logger.info("==> New Task:");
 	logger.info(taskString);
 	
+	// Todo - only box is supported.
+	task["storageProvider"] = "box";
+	task["apiKey"] = conf.box.apiKey;
+	task["access_token"] = req.session.auth.box.authToken;
+	
 	pendingTranslationTasks.push(task);
+	
+	dispatchTasks();
 	
 	res.send(200); // success
 });
 
+function dispatchTasks(){
+
+	if(workerSockets.length == 0)
+		retrun;
+		
+	var length = pendingTranslationTasks.length;
+	if(length == 0)
+		retrun;
+		
+	
+	 var socket = workerSockets[0]; // ToDo only support one worker so far. Add more when necessary
+	 
+	 for(var i = 0; i < length; ++i){
+	 	var task = pendingTranslationTasks[i];
+		 socket.emit('dispatchTask', task);
+	 }
+	 
+	 pendingTranslationTasks = [];
+}
   
 /**********************************************************************/
 // Configure http server.
@@ -242,12 +269,10 @@ var httpApp = http.createServer(app).listen(listeningPort);
 /**********************************************************************/
 var io = sio.listen(httpApp);
 io.set('log level', 1); // reduce logging
-var workerSockets = [];
+
 io.sockets.on('connection', function (socket) {
 		workerSockets.push(socket);
 		logger.info("New client is connected.");
-		
-  		socket.emit('dispatchTask', { hello: 'world' });
   		
   		socket.on('disconnect', function () {
   			logger.info("Client is disconnected.");
