@@ -2,7 +2,13 @@
 $(document).ready(function(){
 	$("#start-button").button();
 	$("#start-button").click( function(e){
-		alert("Welcome to use the free translation service. We are working in progress!");
+		// Check 
+		$.post("/submit", { name: "John", time: "2pm" }, function() {
+			parent.location.href='/?d=1';
+			alert("Your request is accepted.");
+		})
+		.error(function() { parent.location.href='/error';});
+    
 	});
 	
 	var messageSolver = actionMessage.getMessageSolver(); 
@@ -34,6 +40,16 @@ $(document).ready(function(){
    $("#qq").click(function(event){
      showWipMessage();
    });
+   
+   $('input:radio[name=format]').change(function(){
+			var fileFullName = $("#srcFile").val();
+			if(fileFullName != ""){
+				var ext = $('input:radio[name=format]:checked').val();
+				var destName = fileFullName + "." + ext;
+				$("#destFile").val(destName);
+			}
+	   }
+   ); 
    
  });
  

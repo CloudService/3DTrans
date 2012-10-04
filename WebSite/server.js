@@ -10,6 +10,11 @@ var log4js = require('log4js');
 var http = require('http');
 
 /**********************************************************************/
+// global variables
+/**********************************************************************/
+var pendingTranslationTasks=[];
+
+/**********************************************************************/
 // Configure logger
 /**********************************************************************/
 
@@ -83,18 +88,24 @@ app.get('/', function(req, res, next){
 	
 	var auth = req.session.auth;
 	var boxAuth = auth ? auth.box : null;
-	if(boxAuth)
-		renderWithFileDialog(req, res, next);
+	var showDefault = req.query.d ? true : false; // http://server.com/?d=1
+	
+	if(showDefault || !boxAuth)
+		renderDefaultPage(req, res, next);
 	else
-   	 	renderDefaultPage(req, res, next);
+   	 	renderWithFileDialog(req, res, next);
    	 
    	function renderDefaultPage(req, res, next){
    	
 		var amessage = "";
+		var workerNum = workerSockets.length;
+		var taskNum = pendingTranslationTasks.length;
 				
 	   res.render('index'
 		, {
-			locals: { "amessage": amessage }
+			locals: { "amessage": amessage
+					  , "workerNum": workerNum
+					  , "taskNum" : taskNum }
 		 });
    	}
    	 
@@ -182,11 +193,16 @@ app.get('/', function(req, res, next){
 						
 			var amessage = JSON.stringify(aobject);
 			logger.info(amessage);
+			
+			var workerNum = workerSockets.length;
+			var taskNum = pendingTranslationTasks.length;
 					
-		   res.render('index'
-			, {
-				locals: { "amessage": amessage }
-			 });
+		   	res.render('index'
+				, {
+					locals: { "amessage": amessage
+							  , "workerNum": workerNum 
+							  , "taskNum" : taskNum}
+				 });
 		});
    		
    	
@@ -196,9 +212,22 @@ app.get('/', function(req, res, next){
    	 
 });
 
-app.get('/login', function (req, res)
+app.get('/error', function (req, res)
 {
-    res.render('login');
+    res.send('Unexpected error is encountered when post your request.');
+});
+
+app.post('/submit', function(req, res, next){
+	// req.body saves posted JSON object.
+	var task = req.body;
+	var taskString = JSON.stringify(task);
+	
+	logger.info("==> New Task:");
+	logger.info(taskString);
+	
+	pendingTranslationTasks.push(task);
+	
+	res.send(200); // success
 });
 
   

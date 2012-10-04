@@ -128,7 +128,7 @@ component.ui.fileDialog.dialog = function (){
 			// DOM element
 			var args = {
 				"id": file["id"]
-				, "thumbnail": file["isFolder"] ? "file-icon-folder" : "file-icon-image"
+				, "thumbnail": file["isFolder"] ? "file-icon-folder" : "file-icon-cloud"
 				, "name" : file["name"]
 				, "size": file["size"]
 				, "moddate": file["moddate"]

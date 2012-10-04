@@ -164,6 +164,16 @@
 	left: 5px;
 }
 
+.file-icon-cloud{
+	background: transparent url('sprite_list_icon.gif') no-repeat;
+	background-position: -416px -80px;
+	width:26px;
+	height:24px;
+	position:relative;
+	top: 10px;
+	left: 5px;
+}
+
 .file-icon-image{
 	background: transparent url('sprite_list_icon.gif') no-repeat;
 	background-position: 0px -80px;
