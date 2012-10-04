@@ -5,10 +5,26 @@
 var express = require('express')
   , everyauth = require('everyauth')
   , conf = require('./lib/conf')
-  , request = require('request');
+  , request = require('request')
+  , sio = require('socket.io');
+var log4js = require('log4js');
 
+/**********************************************************************/
+// Configure logger
+/**********************************************************************/
 
+log4js.configure({
+    appenders: [
+        { type: "console" }
+    ],
+    replaceConsole: true
+});
+
+var logger = log4js.getLogger();
+
+/**********************************************************************/
 // Configure everyauth
+/**********************************************************************/
 everyauth.debug = true;
 
 var usersById = {};
@@ -42,9 +58,36 @@ everyauth.box
       (usersByBoxId[boxUser.user_id] = addUser('box', boxUser));
   })
   .redirectPath('/');
+  
+/**********************************************************************/
+// socket.io.  Listens on port 8081
+/**********************************************************************/
+var io = sio.listen(8081);
+io.set('log level', 1); // reduce logging
+var workerSockets = [];
+io.sockets.on('connection', function (socket) {
+		workerSockets.push(socket);
+		logger.info("New client is connected.");
+		
+  		socket.emit('dispatchTask', { hello: 'world' });
+  		
+  		socket.on('disconnect', function () {
+  			logger.info("Client is disconnected.");
+    		
+    		var length = workerSockets.length;
+    		for(var i = 0; i < length; i++){
+    			if(workerSockets[i] == socket){
+    				workerSockets.splice(i, 1);
+    				break;
+    			}
+    		}
+  		});
+  		
+	});
 
-
+/**********************************************************************/
 // Configure express
+/**********************************************************************/
 var app = express();
 app.use(express.static(__dirname + '/public'))
   .use(express.bodyParser())
@@ -162,7 +205,7 @@ app.get('/', function(req, res, next){
 				};
 						
 			var amessage = JSON.stringify(aobject);
-			console.log(amessage);
+			logger.info(amessage);
 					
 		   res.render('index'
 			, {
@@ -183,4 +226,5 @@ app.get('/login', function (req, res)
 });
 
 app.listen(app.get('port'));
-console.log('Listening on port ' + app.get('port'));
+logger.info('Web site is listening on port ' + app.get('port'));
+logger.info('Socket is listening on port 8081');

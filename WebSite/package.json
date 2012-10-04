@@ -4,10 +4,12 @@
   "description": "3d translator service",
   "main": "server.js",
   "dependencies": {
+  	  "log4js":"",
       "express": "3.0.0rc4",
       "ejs":"*",
       "everyauth": "git://github.com/bnoguchi/everyauth.git#express3",
-      "request":""
+      "request":"",
+      "socket.io":"" 
   }, 
 	"devDependencies": {
     "jade": ">=0.12.1"
