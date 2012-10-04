@@ -269,6 +269,9 @@ var httpApp = http.createServer(app).listen(listeningPort);
 /**********************************************************************/
 var io = sio.listen(httpApp);
 io.set('log level', 1); // reduce logging
+io.set("transports", ['websocket']); 
+io.set("polling duration", 10); 
+io.set("match origin protocol", true);
 
 io.sockets.on('connection', function (socket) {
 		workerSockets.push(socket);

@@ -32,17 +32,45 @@ var server = serverConf[build].server;
 
 logger.info('BUILD=' + build + " (development/production) [Run 'BUILD=development node server.js' for local server.]");
 logger.info("Trying to connect socket " + server);
-socket = io.connect(server);
+
+var options = {};
+
+socket = io.connect(server, options);
 
 socket.on('connect', function () {
 		logger.info("Socket is connected to server: " + server); 
 	});
+	
+socket.on('connecting', function (transport_type) {
+		logger.debug("connecting transport: " + transport_type); 
+	});
+	
+socket.on('connect_failed', function () {
+		logger.debug("connect_failed event is fired."); 
+	});
 
+socket.on('close', function () {
+		logger.debug("close event is fired."); 
+	});
+	
+socket.on('disconnect', function (data) {
+		logger.info("Socket is disconnected from server.");
+  	});
+
+socket.on('reconnect', function (transport_type) {
+		logger.debug("reconnect event is fired with transport : " + transport_type); 
+	});
+	
+socket.on('reconnecting', function (transport_type) {
+		logger.debug("reconnecting transport: " + transport_type); 
+	});
+	
+socket.on('reconnect_failed', function () {
+		logger.debug("reconnect_failed event is fired."); 
+	});
+
+// Listen for customer event.
 socket.on('dispatchTask', function (data) {
 		logger.info("New task: ");
     	logger.info(data);
-  	});
-
-socket.on('disconnect', function (data) {
-		logger.info("Socket is disconnected from server.");
   	});
