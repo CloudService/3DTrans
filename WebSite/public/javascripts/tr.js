@@ -103,6 +103,7 @@ service.trans.translator = function (){
 			
 			var fileFullName = selection.fullName();
 			task["srcFileFullName"] = fileFullName;
+			task["destFolderId"] = selection["parent"]["id"];
 			
 			// Update DOM
 			$("#srcFile").val(fileFullName);
@@ -117,6 +118,7 @@ service.trans.translator.task={
 	"srcFileId" : ""
 	, "srcFileName" : ""
 	, "srcFileFullName" :""
+	, "destFolderId": ""
 	, "destFormat": ""
 	, "destFileName" : ""
 	, "email": ""};
