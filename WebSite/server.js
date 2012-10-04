@@ -4,10 +4,10 @@
  */
 var express = require('express')
   , everyauth = require('everyauth')
-  , conf = require('./lib/conf')
   , request = require('request')
   , sio = require('socket.io');
 var log4js = require('log4js');
+var http = require('http');
 
 /**********************************************************************/
 // Configure logger
@@ -26,6 +26,8 @@ var logger = log4js.getLogger();
 // Configure everyauth
 /**********************************************************************/
 everyauth.debug = true;
+var build = process.env.BUILD || "production"; 
+var conf = require('./lib/conf')[build];
 
 var usersById = {};
 var nextUserId = 0;
@@ -58,32 +60,6 @@ everyauth.box
       (usersByBoxId[boxUser.user_id] = addUser('box', boxUser));
   })
   .redirectPath('/');
-  
-/**********************************************************************/
-// socket.io.  Listens on port 8081
-/**********************************************************************/
-var io = sio.listen(8081);
-io.set('log level', 1); // reduce logging
-var workerSockets = [];
-io.sockets.on('connection', function (socket) {
-		workerSockets.push(socket);
-		logger.info("New client is connected.");
-		
-  		socket.emit('dispatchTask', { hello: 'world' });
-  		
-  		socket.on('disconnect', function () {
-  			logger.info("Client is disconnected.");
-    		
-    		var length = workerSockets.length;
-    		for(var i = 0; i < length; i++){
-    			if(workerSockets[i] == socket){
-    				workerSockets.splice(i, 1);
-    				break;
-    			}
-    		}
-  		});
-  		
-	});
 
 /**********************************************************************/
 // Configure express
@@ -225,6 +201,42 @@ app.get('/login', function (req, res)
     res.render('login');
 });
 
-app.listen(app.get('port'));
-logger.info('Web site is listening on port ' + app.get('port'));
-logger.info('Socket is listening on port 8081');
+  
+/**********************************************************************/
+// Configure http server.
+/**********************************************************************/
+var listeningPort = app.get('port');
+var httpApp = http.createServer(app).listen(listeningPort);
+
+/**********************************************************************/
+// socket.io.  Listens on the same port as http
+/**********************************************************************/
+var io = sio.listen(httpApp);
+io.set('log level', 1); // reduce logging
+var workerSockets = [];
+io.sockets.on('connection', function (socket) {
+		workerSockets.push(socket);
+		logger.info("New client is connected.");
+		
+  		socket.emit('dispatchTask', { hello: 'world' });
+  		
+  		socket.on('disconnect', function () {
+  			logger.info("Client is disconnected.");
+    		
+    		var length = workerSockets.length;
+    		for(var i = 0; i < length; i++){
+    			if(workerSockets[i] == socket){
+    				workerSockets.splice(i, 1);
+    				break;
+    			}
+    		}
+  		});
+  		
+	});
+	
+//**********************************************************************/
+// Done! log the system information
+/**********************************************************************/
+logger.info('BUILD=' + build + " (development/production) [Run 'BUILD=development node server.js' for local server.]");
+logger.info('Web site is listening on port ' + listeningPort);
+logger.info('Socket is listening on port ' + listeningPort);

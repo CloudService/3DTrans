@@ -22,8 +22,16 @@ var logger = log4js.getLogger();
 // Configure socket.io
 /**********************************************************************/
 
-var server = 'http://localhost:8081';
+var build = process.env.BUILD || "production"; 
 
+var serverConf = {
+	"development": {"server": 'http://localhost:3000'}
+	, "production": {"server": 'http://sw.ap01.aws.af.cm:80'}
+};
+var server = serverConf[build].server;
+
+logger.info('BUILD=' + build + " (development/production) [Run 'BUILD=development node server.js' for local server.]");
+logger.info("Trying to connect socket " + server);
 socket = io.connect(server);
 
 socket.on('connect', function () {
