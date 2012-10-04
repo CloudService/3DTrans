@@ -1,6 +1,6 @@
 
 * Service home page
-http://tr.ap01.aws.af.cm/
+http://sw.ap01.aws.af.cm/
 
 * Folder structure
 website
