@@ -258,11 +258,10 @@ app.post('/submit', function(req, res, next){
 // Rest API to get the tasks
 app.get('/tasks', function(req, res, next){
 
-	var tasks = pendingTranslationTasks;
+	var task = pendingTranslationTasks.splice(0,1); // Pop the front one.
 	
-	res.send(tasks);
+	res.send(task);
 	
-	pendingTranslationTasks = [];
 });
 
 function dispatchTasks(){
