@@ -233,9 +233,36 @@ app.post('/submit', function(req, res, next){
 	
 	pendingTranslationTasks.push(task);
 	
-	dispatchTasks();
-	
 	res.send(200); // success
+	
+	/*
+	// This function results in the server error hosted by appfog. Disable it.
+	
+	Response header
+		HTTP/1.1 500 Internal Server Error
+		Accept-Ranges: bytes
+		Age: 0
+		Content-Type: text/plain
+		Date: Thu, 04 Oct 2012 10:43:23 GMT
+		Server: nginx
+		Via: 1.1 varnish
+		X-Powered-By: Express
+		X-Varnish: 1494411374
+		Content-Length: 1360
+		Connection: keep-alive
+	*/
+	
+	// dispatchTasks(); 
+});
+
+// Rest API to get the tasks
+app.get('/tasks', function(req, res, next){
+
+	var tasks = pendingTranslationTasks;
+	
+	res.send(tasks);
+	
+	pendingTranslationTasks = [];
 });
 
 function dispatchTasks(){
@@ -247,7 +274,6 @@ function dispatchTasks(){
 	if(length == 0)
 		retrun;
 		
-	
 	 var socket = workerSockets[0]; // ToDo only support one worker so far. Add more when necessary
 	 
 	 for(var i = 0; i < length; ++i){
