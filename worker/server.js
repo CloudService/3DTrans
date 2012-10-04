@@ -70,7 +70,43 @@ socket.on('reconnect_failed', function () {
 	});
 
 // Listen for customer event.
-socket.on('dispatchTask', function (data) {
-		logger.info("New task: ");
-    	logger.info(data);
+socket.on('dispatchTask', function (t) {
+		logger.info("==> New task <==");
+    	logger.info(t);
+    	
+    	//var t = JSON.parse(data);
+    	
+    	downloadFile(t, function(){ 
+    		doTranslation(t, function(){
+    			uploadFile(t, function(){
+    				sendMailNotification(t);
+    				})
+    			})
+    		});
+    	
   	});
+  	
+var downloadFile = function(t, cb){
+
+	// ToDo download file from box
+	
+	logger.info("File [" + t["srcFileName"] + "] download completed.");
+	cb();
+
+}
+
+var doTranslation = function(t, cb){
+
+	logger.info("File [" + t["destFileName"] + "] translation completed.");
+	cb();
+}
+
+var uploadFile = function(t, cb){
+	logger.info("File [" + t["destFileName"] + "] upload completed.");
+	cb();
+}
+
+var sendMailNotification = function(t){
+	logger.info("Mail [" + t["email"] + "] notification completed.");
+
+}
