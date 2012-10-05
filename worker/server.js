@@ -28,7 +28,7 @@ var build = process.env.BUILD || "production";
 
 var serverConf = {
 	"development": {"server": 'http://localhost:3000'}
-	, "production": {"server": 'http://sw.ap01.aws.af.cm:80'}
+	, "production": {"server": 'http://sw.ap01.aws.af.cm'}
 };
 var server = serverConf[build].server;
 var useSocket = false;
@@ -101,9 +101,11 @@ else {
 		}
 		
 		// make the request to get the task from server
-		logger.debug("Get task from server.");
+		
 		
 		var url = server + '/tasks';
+		
+		logger.debug("Get task from server: " + url);
 		request.get({url:url}, function (err, res, body) {
 			
 			try{
@@ -111,6 +113,7 @@ else {
 			
 			}catch(e){
 				logger.debug("Invalid tasks body.");
+				logger.debug(body);
 				return;
 			}
 			
