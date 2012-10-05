@@ -31,64 +31,119 @@ var serverConf = {
 	, "production": {"server": 'http://sw.ap01.aws.af.cm:80'}
 };
 var server = serverConf[build].server;
-
+var useSocket = false;
 logger.info('BUILD=' + build + " (development/production) [Run 'BUILD=development node server.js' for local server.]");
-logger.info("Trying to connect socket " + server);
 
-var options = {};
 
-socket = io.connect(server, options);
-
-socket.on('connect', function () {
-		logger.info("Socket is connected to server: " + server); 
-	});
+if(useSocket){
 	
-socket.on('connecting', function (transport_type) {
-		logger.debug("connecting transport: " + transport_type); 
-	});
+	logger.info("Trying to connect socket " + server);
+	var options = {};
 	
-socket.on('connect_failed', function () {
-		logger.debug("connect_failed event is fired."); 
-	});
+	socket = io.connect(server, options);
+	
+	socket.on('connect', function () {
+			logger.info("Socket is connected to server: " + server); 
+		});
+		
+	socket.on('connecting', function (transport_type) {
+			logger.debug("connecting transport: " + transport_type); 
+		});
+		
+	socket.on('connect_failed', function () {
+			logger.debug("connect_failed event is fired."); 
+		});
+	
+	socket.on('close', function () {
+			logger.debug("close event is fired."); 
+		});
+		
+	socket.on('disconnect', function (data) {
+			logger.info("Socket is disconnected from server.");
+		});
+	
+	socket.on('reconnect', function (transport_type) {
+			logger.debug("reconnect event is fired with transport : " + transport_type); 
+		});
+		
+	socket.on('reconnecting', function (transport_type) {
+			logger.debug("reconnecting transport: " + transport_type); 
+		});
+		
+	socket.on('reconnect_failed', function () {
+			logger.debug("reconnect_failed event is fired."); 
+		});
+	
+	// Listen for customer event.
+	socket.on('dispatchTask', function (t) {
+			logger.info("==> New task <==");
+			logger.info(t);
+			
+			//var t = JSON.parse(data);
+			
+			executeTask(t);
+			
+		});
+}
+else {
 
-socket.on('close', function () {
-		logger.debug("close event is fired."); 
-	});
+	/**/
 	
-socket.on('disconnect', function (data) {
-		logger.info("Socket is disconnected from server.");
-  	});
+	var isTaskExecuting = false;
+	
+	// Use the timer to make sure this process doesn't exist
+	setTimeout(function(){getTaskFromServer();}, 1000);
+	
+	var getTaskFromServer = function(){
+		if(isTaskExecuting){
+			setTimeout(getTaskFromServer, 4000);
+			return;
+		}
+		
+		// make the request to get the task from server
+		logger.debug("Get task from server.");
+		
+		var url = server + '/tasks';
+		request.get({url:url}, function (err, res, body) {
+			
+			try{
+				var tasks = JSON.parse(body);
+			
+			}catch(e){
+				logger.debug("Invalid tasks body.");
+				return;
+			}
+			
+			var length = tasks.length;
+			if(length> 0){
+				
+				logger.debug("New Tasks");
+				logger.debug(JSON.stringify(body));
+				
+				if(length > 1){
+					logger.error("More than one tasks are returned. Only the first one is executed.");
+				}
+				var t = tasks[0];
+				executeTask(t);
+			}	
+			});
+		
+		setTimeout(getTaskFromServer, 4000);
+	}
 
-socket.on('reconnect', function (transport_type) {
-		logger.debug("reconnect event is fired with transport : " + transport_type); 
-	});
-	
-socket.on('reconnecting', function (transport_type) {
-		logger.debug("reconnecting transport: " + transport_type); 
-	});
-	
-socket.on('reconnect_failed', function () {
-		logger.debug("reconnect_failed event is fired."); 
-	});
-
-// Listen for customer event.
-socket.on('dispatchTask', function (t) {
-		logger.info("==> New task <==");
-    	logger.info(t);
-    	
-    	//var t = JSON.parse(data);
-    	
-    	downloadFile(t, function(){ 
-    		doTranslation(t, function(){
-    			uploadFile(t, function(){
-    				sendMailNotification(t, function (){
-    						cleanupTempFiles(t);
-    					})
-    				})
-    			})
-    		});
-    	
-  	});
+}
+var executeTask = function(t){
+	isTaskExecuting = true;
+	 downloadFile(t, function(){ 
+		 doTranslation(t, function(){
+			 uploadFile(t, function(){
+				 sendMailNotification(t, function (){
+						 cleanupTempFiles(t, function() {isTaskExecuting = false;});
+					 })
+				 })
+			 })
+		 });
+}
   	
 var downloadFile = function(t, cb){
 
@@ -125,7 +180,7 @@ var sendMailNotification = function(t,cb ){
 	cb();
 }
 
-var cleanupTempFiles = function(t){
+var cleanupTempFiles = function(t, cb){
 	logger.debug("Cleanup begins.");
 	
 	fs.unlink(t["localSrcFileName"]);
@@ -134,4 +189,5 @@ var cleanupTempFiles = function(t){
 	logger.debug(t["localSrcFileName"] + ' is deleted');
 	logger.debug(t["localDestFileName"] + ' is deleted');
 	logger.debug("Cleanup is completed.");
+	cb();
 }

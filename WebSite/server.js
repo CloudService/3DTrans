@@ -269,11 +269,11 @@ app.get('/tasks', function(req, res, next){
 function dispatchTasks(){
 
 	if(workerSockets.length == 0)
-		retrun;
+		return;
 		
 	var length = pendingTranslationTasks.length;
 	if(length == 0)
-		retrun;
+		return;
 		
 	 var socket = workerSockets[0]; // ToDo only support one worker so far. Add more when necessary
 	 
