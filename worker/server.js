@@ -27,8 +27,8 @@ var logger = log4js.getLogger();
 var build = process.env.BUILD || "production"; 
 
 var serverConf = {
-	"development": {"server": 'http://localhost:3000'}
-	, "production": {"server": 'http://sw.ap01.aws.af.cm'}
+	"development": {"server": 'http://localhost:3000'} ,
+	"production": {"server": 'http://sw.ap01.aws.af.cm'}
 };
 var server = serverConf[build].server;
 var useSocket = false;
@@ -107,9 +107,9 @@ else {
 		
 		logger.debug("Get task from server: " + url);
 		request.get({url:url}, function (err, res, body) {
-			
+			var tasks = [];
 			try{
-				var tasks = JSON.parse(body);
+				tasks = JSON.parse(body);
 			
 			}catch(e){
 				logger.debug("Invalid tasks body.");
@@ -132,58 +132,58 @@ else {
 			});
 		
 		setTimeout(getTaskFromServer, 4000);
-	}
+	};
 
 }
 var executeTask = function(t){
 	isTaskExecuting = true;
-	 downloadFile(t, function(){ 
-		 doTranslation(t, function(){
-			 uploadFile(t, function(){
-				 sendMailNotification(t, function (){
-						 cleanupTempFiles(t, function() {isTaskExecuting = false;});
-					 })
-				 })
-			 })
-		 });
-}
-  	
+		downloadFile(t, function(){ 
+			doTranslation(t, function(){
+				uploadFile(t, function(){
+					sendMailNotification(t, function (){
+						cleanupTempFiles(t, function() {isTaskExecuting = false;});
+					});
+				});
+			});
+		});
+};
+
 var downloadFile = function(t, cb){
 
 	// ToDo download file from box
-	var url = 'https://api.box.com/2.0/files/'+t['srcFileId'] +'/data';
-	var headers = {Authorization: 'BoxAuth api_key='+t['apiKey'] +'&auth_token='+t['access_token']};
+	var url = 'https://api.box.com/2.0/files/'+t.srcFileId +'/data';
+	var headers = {Authorization: 'BoxAuth api_key='+t.apiKey +'&auth_token='+t.access_token};
 
-	var localSrcFileName =  __dirname + '/' + t['taskId'].toString() + '_' + t["srcFileName"];
-	t["localSrcFileName"] =localSrcFileName;
+	var localSrcFileName =  __dirname + '/' + t.taskId.toString() + '_' + t.srcFileName;
+	t.localSrcFileName =localSrcFileName;
 	request.get({url:url, headers:headers}).pipe(fs.createWriteStream(localSrcFileName));
 
-	logger.debug("File [" + t["srcFileName"] + "] is download as ["+localSrcFileName+"].");
+	logger.debug("File [" + t.srcFileName + "] is download as ["+localSrcFileName+"].");
 	cb();
 
-}
+};
 
 var doTranslation = function(t, cb){
 
-	var localDestFileName = __dirname + '/' + t['taskId'].toString() + '_' + t["destFileName"];
-	t["localDestFileName"] = localDestFileName;
+	var localDestFileName = __dirname + '/' + t.taskId.toString() + '_' + t.destFileName;
+	t.localDestFileName = localDestFileName;
 	
-	fs.renameSync(t["localSrcFileName"], localDestFileName); // Todo - use the rename for prototype.
+	fs.renameSync(t.localSrcFileName, localDestFileName); // Todo - use the rename for prototype.
 	logger.debug("File [" + localDestFileName + "] is translated.");
 	cb();
-}
+};
 
 var uploadFile = function(t, cb){
 
 	// curl https://www.box.com/api/2.0/files/data -H "Authorization: BoxAuth api_key=ujdb2e8pe3geqmkgm2fg66pg552dwl2f&auth_token=jbpktqjbkz4qrmsc2ok5rmx8j2lbenmu" -F filename=@avatar_n.jpg -F folder_id=0
 	
-	var auth = '"Authorization: BoxAuth api_key='+t['apiKey'] +'&auth_token='+t['access_token'] + '"';
-	var file = 'filename=@' + t["localDestFileName"];
-	var folder = 'folder_id=' + t["destFolderId"];
-	var args = ['https://www.box.com/api/2.0/files/data'
-				, '-H', auth
-				, '-F', file
-				, '-F', folder];
+	var auth = '"Authorization: BoxAuth api_key='+t.apiKey +'&auth_token='+t.access_token + '"';
+	var file = 'filename=@' + t.localDestFileName;
+	var folder = 'folder_id=' + t.destFolderId;
+	var args = ['https://www.box.com/api/2.0/files/data',
+				'-H', auth,
+				'-F', file,
+				'-F', folder];
 	logger.debug("curl args: " + JSON.stringify(args));
 	var spawn = require('child_process').spawn;
     var curl  = spawn('curl', args);
@@ -192,30 +192,30 @@ var uploadFile = function(t, cb){
 	});
 	
 	curl.stderr.on('data', function (data) {
-	  	logger.debug('curl stderr: ' + data);
+		logger.debug('curl stderr: ' + data);
 	});
 	
 	curl.on('exit', function (code) {
-	  	logger.debug('curl child process exited with code ' + code);
-	  
-	  	logger.debug("File [" + t["localDestFileName"] + "] is uploaded as ["+ t["destFileName"] +"].");
+		logger.debug('curl child process exited with code ' + code);
+		
+		logger.debug("File [" + t.localDestFileName + "] is uploaded as ["+ t.destFileName +"].");
 		cb();
 	});
-}
+};
 
 var sendMailNotification = function(t,cb ){
-	logger.debug("Mail notification is sent to [" + t["email"] + "].");
+	logger.debug("Mail notification is sent to [" + t.email + "].");
 	cb();
-}
+};
 
 var cleanupTempFiles = function(t, cb){
 	logger.debug("Cleanup begins.");
 	
-	fs.unlink(t["localSrcFileName"]);
-	fs.unlink(t["localDestFileName"]);
+	fs.unlink(t.localSrcFileName);
+	fs.unlink(t.localDestFileName);
 	
-	logger.debug(t["localSrcFileName"] + ' is deleted');
-	logger.debug(t["localDestFileName"] + ' is deleted');
+	logger.debug(t.localSrcFileName + ' is deleted');
+	logger.debug(t.localDestFileName + ' is deleted');
 	logger.debug("Cleanup is completed.");
 	cb();
-}
+};
