@@ -13,7 +13,7 @@ $(document).ready(function(){
 		
 		task["email"] = $("#email").val();
 		
-		$.post("/submit", task, function() {
+		$.post("/api/1.0/tasks", task, function() {
 			parent.location.href='/?d=1'; // update the task queue number
 			alert("Your request is accepted.");
 		})

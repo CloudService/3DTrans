@@ -219,7 +219,11 @@ app.get('/error', function (req, res)
     res.send('Unexpected error is encountered when post your request.');
 });
 
-app.post('/submit', function(req, res, next){
+/**********************************************************************/
+// Define the REST api.
+/**********************************************************************/
+
+app.post('/api/1.0/tasks', function(req, res, next){
 	// req.body saves posted JSON object.
 	var task = req.body;
 	var taskString = JSON.stringify(task);
@@ -258,7 +262,7 @@ app.post('/submit', function(req, res, next){
 });
 
 // Rest API to get the tasks
-app.get('/tasks', function(req, res, next){
+app.get('/api/1.0/tasks', function(req, res, next){
 
 	var task = pendingTranslationTasks.splice(0,1); // Pop the front one.
 	

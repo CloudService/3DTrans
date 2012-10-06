@@ -103,7 +103,7 @@ else {
 		// make the request to get the task from server
 		
 		
-		var url = server + '/tasks';
+		var url = server + '/api/1.0/tasks';
 		
 		logger.debug("Get task from server: " + url);
 		request.get({url:url}, function (err, res, body) {
@@ -174,8 +174,33 @@ var doTranslation = function(t, cb){
 }
 
 var uploadFile = function(t, cb){
-	logger.debug("File [" + t["localDestFileName"] + "] is uploaded as ["+ t["destFileName"] +"].");
-	cb();
+
+	// curl https://www.box.com/api/2.0/files/data -H "Authorization: BoxAuth api_key=ujdb2e8pe3geqmkgm2fg66pg552dwl2f&auth_token=jbpktqjbkz4qrmsc2ok5rmx8j2lbenmu" -F filename=@avatar_n.jpg -F folder_id=0
+	
+	var auth = '"Authorization: BoxAuth api_key='+t['apiKey'] +'&auth_token='+t['access_token'] + '"';
+	var file = 'filename=@' + t["localDestFileName"];
+	var folder = 'folder_id=' + t["destFolderId"];
+	var args = ['https://www.box.com/api/2.0/files/data'
+				, '-H', auth
+				, '-F', file
+				, '-F', folder];
+	logger.debug("curl args: " + JSON.stringify(args));
+	var spawn = require('child_process').spawn;
+    var curl  = spawn('curl', args);
+    curl.stdout.on('data', function (data) {
+		logger.debug('curl stdout: ' + data);
+	});
+	
+	curl.stderr.on('data', function (data) {
+	  	logger.debug('curl stderr: ' + data);
+	});
+	
+	curl.on('exit', function (code) {
+	  	logger.debug('curl child process exited with code ' + code);
+	  
+	  	logger.debug("File [" + t["localDestFileName"] + "] is uploaded as ["+ t["destFileName"] +"].");
+		cb();
+	});
 }
 
 var sendMailNotification = function(t,cb ){
