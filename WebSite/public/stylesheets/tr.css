@@ -55,6 +55,10 @@ fieldset {
 	float: left;
 }
 
+.dest-file-row{
+	clear:both;
+}
+
 .file{
 	width: 500px;
 }

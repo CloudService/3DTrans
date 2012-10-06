@@ -21,6 +21,21 @@ $(document).ready(function(){
     
 	});
 	
+	// update the destination format.
+	var supportedFormats = parent.getDestFormats();
+	var formatListElement = $("#format-list");
+	formatListElement.children().remove(); // Remove all children.
+	var formatLength = supportedFormats.length;
+	for(var i = 0; i < formatLength; ++i){
+		var format = supportedFormats[i];
+		if(0 == i)
+			var formatHTML = '<li> <div>  <input type="radio" name="format" value="'+format+'" checked>'+format+'</div></li>'; // Check the first one
+		else
+			var formatHTML = '<li> <div>  <input type="radio" name="format" value="'+format+'">'+format+'</div></li>';
+		
+		formatListElement.append($(formatHTML));
+	}
+	
 	var messageSolver = actionMessage.getMessageSolver(); 
 	messageSolver.register("translator", new service.trans.translator());
 	

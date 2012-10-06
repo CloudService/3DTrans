@@ -9,4 +9,8 @@ module.exports = {
 			apiKey: 'ch60klzmc4zksm3l101169y7sr371ck0'
 		}
     }
+    , formats: {
+    	'import': ['ipt', 'sat', 'dwg', 'stl']
+    	, 'export': ['dwg', 'dwf', 'stl', 'sat', '3ds', 'nwc', 'nwf', 'f3d', 'stp', 'step', 'png', 'gif', 'pdf']
+    }
 };

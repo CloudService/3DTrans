@@ -71,6 +71,10 @@ everyauth.box
 /**********************************************************************/
 // Configure express
 /**********************************************************************/
+
+var importFormats = require('./lib/conf')['formats']['import'];
+var exportFormats = require('./lib/conf')['formats']['export'];
+
 var app = express();
 app.use(express.static(__dirname + '/public'))
   .use(express.bodyParser())
@@ -92,26 +96,25 @@ app.get('/', function(req, res, next){
 	var boxAuth = auth ? auth.box : null;
 	var showDefault = req.query.d ? true : false; // http://server.com/?d=1
 	
-	if(showDefault || !boxAuth)
-		renderDefaultPage(req, res, next);
-	else
-   	 	renderWithFileDialog(req, res, next);
-   	 
-   	function renderDefaultPage(req, res, next){
-   	
-		var amessage = "";
-		var workerNum = workerSockets.length;
-		var taskNum = pendingTranslationTasks.length;
-				
-	   res.render('index'
-		, {
-			locals: { "amessage": amessage
+	var workerNum = workerSockets.length;
+	var taskNum = pendingTranslationTasks.length;
+	var locals = { "amessage": ""
 					  , "workerNum": workerNum
-					  , "taskNum" : taskNum }
-		 });
+					  , "taskNum" : taskNum 
+					  , "destFormats": JSON.stringify(exportFormats)};
+					  
+	
+	if(showDefault || !boxAuth)
+		renderDefaultPage(req, res, next, locals);
+	else
+   	 	renderWithFileDialog(req, res, next, locals);
+   	 
+   	function renderDefaultPage(req, res, next, locals){
+				
+	   res.render('index', {'locals': locals});
    	}
    	 
-   	function renderWithFileDialog(req, res, next){
+   	function renderWithFileDialog(req, res, next, locals){
    	
 		// Get root folder
 		var url = 'https://www.box.com/api/2.0/folders/0';
@@ -178,9 +181,18 @@ app.get('/', function(req, res, next){
 			var length = boxFileList.length;
 			for(var i = 0; i < length; ++i){
 				var entry = boxFileList[i];
+				var isFolder = entry.type === "folder";
+				var name = entry.name;
+				if(!isFolder){
+					// Check it the file is the supported format.
+					var ext = name.split('.').pop();
+					 var isSupported = (importFormats.indexOf(ext) != -1);
+					 if(!isSupported)
+					 	continue;
+				}
 				var file = {};
-				file.name=entry.name;
-				file.isFolder = entry.type === "folder" ? true : false;
+				file.name=name;
+				file.isFolder = isFolder;
 				file.id = entry.id;
 				file.size = "-"; // Todo get the correct value;
 				file.moddate = "2012-10-4 9:45"; // Todo get the correct value;
@@ -196,15 +208,9 @@ app.get('/', function(req, res, next){
 			var amessage = JSON.stringify(aobject);
 			logger.info(amessage);
 			
-			var workerNum = workerSockets.length;
-			var taskNum = pendingTranslationTasks.length;
+			locals['amessage'] = amessage;
 					
-		   	res.render('index'
-				, {
-					locals: { "amessage": amessage
-							  , "workerNum": workerNum 
-							  , "taskNum" : taskNum}
-				 });
+		   	res.render('index', {'locals': locals});
 		});
    		
    	
