@@ -11,6 +11,6 @@ module.exports = {
     }
     , formats: {
     	'import': ['ipt', 'sat', 'dwg', 'stl']
-    	, 'export': ['dwg', 'dwf', 'stl', 'sat', '3ds', 'nwc', 'nwf', 'f3d', 'stp', 'step', 'png', 'gif', 'pdf']
+    	, 'export': ['dwg', 'dwf', 'stl', 'sat', '3ds', 'nwc', 'nwf', 'f3d', 'stp', 'step', 'png', 'pdf']
     }
 };
