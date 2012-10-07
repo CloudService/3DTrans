@@ -194,7 +194,7 @@ var uploadFile = function(t, cb){
 	var headers = {Authorization: auth};
 	
 	var fileName = t.localDestFileName;
-	var stats = fs.statSync(fileName);
+	var stats = fs.lstatSync(fileName);
 	var fileSize = stats.size;
 	logger.debug('File size: ' + fileSize);
 	rest.post(url, {
@@ -205,35 +205,8 @@ var uploadFile = function(t, cb){
 		'folder_id': t.destFolderId
 	  }
 	}).on('complete', function(data) {
-		console.log(data);
+		logger.debug(data);
 		logger.debug("File [" + t.localDestFileName + "] is uploaded.");
-		cb();
-	});
-	
-	return;
-
-
-	var file = 'filename=@' + t.localDestFileName;
-	var folder = 'folder_id=' + t.destFolderId;
-	var args = ['https://www.box.com/api/2.0/files/data',
-				'-H', auth,
-				'-F', file,
-				'-F', folder];
-	logger.debug("curl args: " + JSON.stringify(args));
-	var spawn = require('child_process').spawn;
-    var curl  = spawn('curl', args);
-    curl.stdout.on('data', function (data) {
-		logger.debug('curl stdout: ' + data);
-	});
-	
-	curl.stderr.on('data', function (data) {
-		logger.debug('curl stderr: ' + data);
-	});
-	
-	curl.on('exit', function (code) {
-		logger.debug('curl child process exited with code ' + code);
-		
-		logger.debug("File [" + t.localDestFileName + "] is uploaded as ["+ t.destFileName +"].");
 		cb();
 	});
 };
