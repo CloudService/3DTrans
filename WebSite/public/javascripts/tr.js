@@ -107,10 +107,16 @@ service.trans.translator = function (){
 	
 	_onOK = function (event){
 		var dialog = event.data.dialog;
+		if(!dialog.isOkClicked())
+			return;
+			
 		var selections = dialog.getSelections();
 		if(selections.length > 0){
 			var selection = selections[0];
 			
+			if(selection.isFolder)
+				return;
+				
 			// Save the task
 			var task = service.trans.translator.task;
 			task["srcFileId"] = selection["id"];

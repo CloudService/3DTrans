@@ -23,10 +23,13 @@ component.ui.fileDialog.dialog = function (){
 	var _isInitialized = false;
 	
 	/** @type {Array} The array of the selected {component.ui.fileDialog.fileObject} */
-	var _selectedItem = [];
+	var _selectedItems = [];
 	
 	/** @type {Object} the map for {component.ui.fileDialog.fileObject}*/
 	var _fileMap={};
+	
+	/** @type {bool} */
+	var _isOKClicked = false;
 	
 	/** Constructor
 	*@this {component.ui.fileDialog}
@@ -80,7 +83,7 @@ component.ui.fileDialog.dialog = function (){
 		{ 
 			buttons: 
     		{
-        		"Ok": function() { $(this).dialog("close"); } 
+        		"Ok": function() { _isOKClicked = true; $(this).dialog("close"); } 
         		, "Cancel" : function() { $(this).dialog("close"); } 
     		}
     		, title: "Select file"
@@ -232,17 +235,17 @@ component.ui.fileDialog.dialog = function (){
 			return this;
 		}
 		
-		var length = _selectedItem.length;
+		var length = _selectedItems.length;
 		for(var i = 0; i < length; ++i){
-			var temp = _selectedItem[i];
+			var temp = _selectedItems[i];
 			temp.htmlElement.removeClass("file-row-selected");
 			temp.htmlElement.addClass("file-row");
 		}
-		_selectedItem = [];
+		_selectedItems = [];
 		
 		file.htmlElement.removeClass("file-row");
 		file.htmlElement.addClass("file-row-selected");
-		_selectedItem.push(file);
+		_selectedItems.push(file);
 		
 		return this;
 	}
@@ -253,7 +256,7 @@ component.ui.fileDialog.dialog = function (){
 	*@return {Array} of {{component.ui.fileDialog.dialog}}
 	*/
 	this.getSelections = function(){
-		return _selectedItem;
+		return _selectedItems;
 	}
 	
 	/** Bind the event to dialog
@@ -263,6 +266,15 @@ component.ui.fileDialog.dialog = function (){
 	*/	
 	this.bind = function(event,callback){
 		_dialogElement.bind(event, {dialog: this}, callback);
+	}
+	
+	/** Check if the ok button clicked.
+	*@this {component.ui.fileDialog.dialog}
+	*@public
+	*@return {bool}.
+	*/	
+	this.isOkClicked = function(){
+		return _isOKClicked;
 	}
 }
 
