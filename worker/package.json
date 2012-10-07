@@ -6,7 +6,8 @@
   "dependencies": {
       "log4js":"",
       "socket.io-client":"",
-      "request":""
+      "request":"",
+      "restler": ""
   },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"

@@ -5,6 +5,7 @@ var io = require('socket.io-client');
 var log4js = require('log4js');
 var request = require('request');
 var fs = require('fs');
+var rest = require('restler');
 
 /**********************************************************************/
 // Configure logger
@@ -176,7 +177,7 @@ var downloadFile = function(t, cb){
 
 var doTranslation = function(t, cb){
 
-	var localDestFileName = taskFolder + '/' + t.taskId.toString() + '_' + t.destFileName;
+	var localDestFileName = taskFolder + '/' + t.destFileName;
 	t.localDestFileName = localDestFileName;
 	
 	fs.renameSync(t.localSrcFileName, localDestFileName); // Todo - use the rename for prototype.
@@ -188,7 +189,30 @@ var uploadFile = function(t, cb){
 
 	// curl https://www.box.com/api/2.0/files/data -H "Authorization: BoxAuth api_key=ujdb2e8pe3geqmkgm2fg66pg552dwl2f&auth_token=jbpktqjbkz4qrmsc2ok5rmx8j2lbenmu" -F filename=@avatar_n.jpg -F folder_id=0
 	
-	var auth = '"Authorization: BoxAuth api_key='+t.apiKey +'&auth_token='+t.access_token + '"';
+	var auth = 'BoxAuth api_key='+t.apiKey +'&auth_token='+t.access_token + '';
+	var url = 'https://api.box.com/2.0/files/data';
+	var headers = {Authorization: auth};
+	
+	var fileName = t.localDestFileName;
+	var stats = fs.statSync(fileName);
+	var fileSize = stats.size;
+	logger.debug('File size: ' + fileSize);
+	rest.post(url, {
+	  multipart: true,
+	  headers: headers,
+	  data: {
+		'file': rest.file(fileName, null, fileSize, null, null),
+		'folder_id': t.destFolderId
+	  }
+	}).on('complete', function(data) {
+		console.log(data);
+		logger.debug("File [" + t.localDestFileName + "] is uploaded.");
+		cb();
+	});
+	
+	return;
+
+
 	var file = 'filename=@' + t.localDestFileName;
 	var folder = 'folder_id=' + t.destFolderId;
 	var args = ['https://www.box.com/api/2.0/files/data',
