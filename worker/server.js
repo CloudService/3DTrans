@@ -135,6 +135,17 @@ else {
 	};
 
 }
+
+/**********************************************************************/
+// Execute one task
+/**********************************************************************/
+
+// Create task folder __dirname + '/tasks'
+
+var taskFolder = __dirname + '/tasks';
+if(!fs.existsSync(taskFolder))
+	fs.mkdirSync(taskFolder);
+
 var executeTask = function(t){
 	isTaskExecuting = true;
 		downloadFile(t, function(){ 
@@ -154,7 +165,7 @@ var downloadFile = function(t, cb){
 	var url = 'https://api.box.com/2.0/files/'+t.srcFileId +'/data';
 	var headers = {Authorization: 'BoxAuth api_key='+t.apiKey +'&auth_token='+t.access_token};
 
-	var localSrcFileName =  __dirname + '/' + t.taskId.toString() + '_' + t.srcFileName;
+	var localSrcFileName =  taskFolder + '/' + t.taskId.toString() + '_' + t.srcFileName;
 	t.localSrcFileName =localSrcFileName;
 	request.get({url:url, headers:headers}).pipe(fs.createWriteStream(localSrcFileName));
 
@@ -165,7 +176,7 @@ var downloadFile = function(t, cb){
 
 var doTranslation = function(t, cb){
 
-	var localDestFileName = __dirname + '/' + t.taskId.toString() + '_' + t.destFileName;
+	var localDestFileName = taskFolder + '/' + t.taskId.toString() + '_' + t.destFileName;
 	t.localDestFileName = localDestFileName;
 	
 	fs.renameSync(t.localSrcFileName, localDestFileName); // Todo - use the rename for prototype.
@@ -219,3 +230,9 @@ var cleanupTempFiles = function(t, cb){
 	logger.debug("Cleanup is completed.");
 	cb();
 };
+
+
+
+
+
+
