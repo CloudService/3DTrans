@@ -25,7 +25,7 @@ var logger = log4js.getLogger();
 // Configure socket.io
 /**********************************************************************/
 
-var build = process.env.BUILD || "production"; 
+var build = process.env.BUILD || "development"; 
 
 var serverConf = {
 	"development": {"server": 'http://localhost:3000'} ,
